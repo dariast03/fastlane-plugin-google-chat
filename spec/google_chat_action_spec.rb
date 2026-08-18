@@ -35,10 +35,10 @@ describe Fastlane::Helper::GoogleChatHelper do
       card = payload[:cardsV2].first[:card]
       expect(card[:header][:title]).to eq("Title")
       expect(card[:sections].first[:widgets].first[:textParagraph][:text]).to eq("line1<br>line2")
-      key_value = card[:sections].first[:widgets][1][:keyValue]
-      expect(key_value[:topLabel]).to eq("Changes")
-      expect(key_value[:content]).to eq("feat: x<br>fix: y")
-      expect(card[:sections].last[:widgets].first[:buttons].first[:textButton][:text]).to eq("View")
+      decorated = card[:sections].first[:widgets][1][:decoratedText]
+      expect(decorated[:topLabel]).to eq("Changes")
+      expect(decorated[:text]).to eq("feat: x<br>fix: y")
+      expect(card[:sections].last[:widgets].first[:buttonList][:buttons].first[:text]).to eq("View")
     end
   end
 end

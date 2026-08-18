@@ -22,6 +22,7 @@ module Fastlane
       # Builds a cardsV2 payload (Google Chat API v2).
       # Keeps the original plugin contract: title, description,
       # section1Title, section1Description, buttonTitle, buttonUrl, imageUrl.
+      # Uses cardsV2 widget types: textParagraph, decoratedText, buttonList.
       def self.card_payload(title:, description:, image_url: nil, section1_title: nil,
                             section1_description: nil, button_title: nil, button_url: nil)
         widgets = []
@@ -32,9 +33,9 @@ module Fastlane
 
         if section1_title || section1_description
           widgets << {
-            keyValue: {
+            decoratedText: {
               topLabel: section1_title,
-              content: paragraph(section1_description)
+              text: paragraph(section1_description)
             }
           }
         end
@@ -46,14 +47,14 @@ module Fastlane
           sections << {
             widgets: [
               {
-                buttons: [
-                  {
-                    textButton: {
+                buttonList: {
+                  buttons: [
+                    {
                       text: button_title,
                       onClick: { openLink: { url: button_url } }
                     }
-                  }
-                ]
+                  ]
+                }
               }
             ]
           }
