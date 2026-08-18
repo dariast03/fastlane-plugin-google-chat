@@ -54,11 +54,12 @@ module Fastlane
       # Builds a cardsV2 payload (Google Chat API v2) matching Google's
       # webhook card format: one section with textParagraph + buttonList,
       # description in the header subtitle, and a simple cardId.
-      def self.card_payload(title:, description:, subtitle: nil, section_title: nil,
+      def self.card_payload(title:, description:, subtitle: nil, image_url: nil, section_title: nil,
                             section_description: nil, button_title: nil, button_url: nil)
         widgets = []
         header = {}
         header[:title] = title.to_s if title && !title.to_s.strip.empty?
+        header[:imageUrl] = image_url if image_url && !image_url.to_s.strip.empty?
 
         has_section = !section_title.to_s.strip.empty? || !section_description.to_s.strip.empty?
         if has_section

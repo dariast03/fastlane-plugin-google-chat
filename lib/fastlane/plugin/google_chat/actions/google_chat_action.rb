@@ -18,9 +18,10 @@ module Fastlane
           payload = Helper::GoogleChatHelper.card_payload(
             title: params[:title],
             description: params[:description],
+            subtitle: params[:subtitle],
             image_url: params[:imageUrl],
-            section1_title: params[:section1Title],
-            section1_description: params[:section1Description],
+            section_title: params[:section1Title],
+            section_description: params[:section1Description],
             button_title: params[:buttonTitle],
             button_url: params[:buttonUrl]
           )
@@ -64,6 +65,11 @@ module Fastlane
           FastlaneCore::ConfigItem.new(key: :description,
                                        env_name: "GOOGLE_CHAT_DESCRIPTION",
                                        description: "Description / body of the message",
+                                       optional: true,
+                                       type: String),
+          FastlaneCore::ConfigItem.new(key: :subtitle,
+                                       env_name: "GOOGLE_CHAT_SUBTITLE",
+                                       description: "Subtitle of the card header",
                                        optional: true,
                                        type: String),
           FastlaneCore::ConfigItem.new(key: :imageUrl,
