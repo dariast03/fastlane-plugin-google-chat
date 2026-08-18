@@ -22,6 +22,11 @@ describe Fastlane::Helper::GoogleChatHelper do
       expect(Fastlane::Helper::GoogleChatHelper.plain_payload("hello\nworld"))
         .to eq({ text: "hello\nworld" })
     end
+
+    it 'normalizes literal backslash-n to real newlines' do
+      expect(Fastlane::Helper::GoogleChatHelper.plain_payload("hello\\nworld"))
+        .to eq({ text: "hello\nworld" })
+    end
   end
 
   describe '#card_payload' do

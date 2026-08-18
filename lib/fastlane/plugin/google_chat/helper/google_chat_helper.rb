@@ -19,9 +19,15 @@ module Fastlane
             .gsub("\n", "<br>")
       end
 
+      # Normalizes newlines to real "\n" for plain text messages
+      # (literal backslash-n sequences become real newlines).
+      def self.normalize_newlines(text)
+        text.to_s.gsub("\r\n", "\n").gsub('\\n', "\n")
+      end
+
       # Builds a plain-text payload ({"text": ...}) that preserves newlines.
       def self.plain_payload(text)
-        { text: text.to_s }
+        { text: normalize_newlines(text) }
       end
 
       # Builds a cardsV2 payload (Google Chat API v2).
