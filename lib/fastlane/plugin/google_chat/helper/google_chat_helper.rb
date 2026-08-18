@@ -10,8 +10,13 @@ module Fastlane
     class GoogleChatHelper
       # Converts newlines to <br> so they render correctly inside a
       # textParagraph of a Google Chat card (API v2).
+      # Handles both real newlines (\n, \r\n) and literal "\n" escape sequences
+      # (backslash + n) that may appear in strings from shell/env sources.
       def self.paragraph(text)
-        text.to_s.gsub("\r\n", "\n").gsub("\n", "<br>")
+        text.to_s
+            .gsub("\r\n", "\n")
+            .gsub('\\n', "\n")   # literal backslash-n -> real newline
+            .gsub("\n", "<br>")
       end
 
       # Builds a plain-text payload ({"text": ...}) that preserves newlines.

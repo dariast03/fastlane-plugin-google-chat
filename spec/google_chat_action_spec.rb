@@ -4,6 +4,10 @@ describe Fastlane::Helper::GoogleChatHelper do
       expect(Fastlane::Helper::GoogleChatHelper.paragraph("line1\nline2")).to eq("line1<br>line2")
     end
 
+    it 'handles literal backslash-n escape sequences' do
+      expect(Fastlane::Helper::GoogleChatHelper.paragraph("line1\\nline2")).to eq("line1<br>line2")
+    end
+
     it 'handles CRLF' do
       expect(Fastlane::Helper::GoogleChatHelper.paragraph("a\r\nb")).to eq("a<br>b")
     end
