@@ -90,5 +90,22 @@ describe Fastlane::Helper::GoogleChatHelper do
       expect(button[:text]).to eq("Ver")
       expect(button[:onClick][:openLink][:url]).to eq("https://example.com")
     end
+
+    it 'builds multiple buttons from the buttons array' do
+      payload = Fastlane::Helper::GoogleChatHelper.card_payload(
+        title: "T",
+        description: "D",
+        buttons: [
+          { text: "Abrir Consola", url: "https://console.example.com" },
+          { text: "Descargar APK (1 hora)", url: "https://download.example.com" }
+        ]
+      )
+      widgets = payload[:cardsV2].first[:card][:sections].first[:widgets]
+      list = widgets.last[:buttonList][:buttons]
+      expect(list.length).to eq(2)
+      expect(list[0][:text]).to eq("Abrir Consola")
+      expect(list[1][:text]).to eq("Descargar APK (1 hora)")
+      expect(list[1][:onClick][:openLink][:url]).to eq("https://download.example.com")
+    end
   end
 end

@@ -14,7 +14,7 @@ module Fastlane
           # Plain text message: preserves newlines as-is.
           payload = Helper::GoogleChatHelper.plain_payload(params[:description])
         else
-          # Card v2: description with <br>, title, section and button.
+          # Card v2: description with <br>, title, section and button(s).
           payload = Helper::GoogleChatHelper.card_payload(
             title: params[:title],
             description: params[:description],
@@ -23,7 +23,8 @@ module Fastlane
             section_title: params[:section1Title],
             section_description: params[:section1Description],
             button_title: params[:buttonTitle],
-            button_url: params[:buttonUrl]
+            button_url: params[:buttonUrl],
+            buttons: params[:buttons]
           )
         end
 
@@ -97,6 +98,12 @@ module Fastlane
                                        description: "URL opened by the button",
                                        optional: true,
                                        type: String),
+          FastlaneCore::ConfigItem.new(key: :buttons,
+                                       env_name: "GOOGLE_CHAT_BUTTONS",
+                                       description: "Array of buttons: [{ text: 'Label', url: 'https://...' }]",
+                                       optional: true,
+                                       type: Array,
+                                       skip_type_validation: true),
           FastlaneCore::ConfigItem.new(key: :message_type,
                                        env_name: "GOOGLE_CHAT_MESSAGE_TYPE",
                                        description: "How to send the message: 'card' (default, uses cardsV2) or 'plain' (simple text that keeps newlines)",

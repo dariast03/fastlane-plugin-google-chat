@@ -54,8 +54,11 @@ module Fastlane
       # Builds a cardsV2 payload (Google Chat API v2) matching Google's
       # webhook card format: one section with textParagraph + buttonList,
       # description in the header subtitle, and a simple cardId.
+      #
+      # buttons: array of { text:, url: } to render as a buttonList.
+      # Falls back to button_title/button_url for a single button.
       def self.card_payload(title:, description:, subtitle: nil, image_url: nil, section_title: nil,
-                            section_description: nil, button_title: nil, button_url: nil)
+                            section_description: nil, button_title: nil, button_url: nil, buttons: nil)
         widgets = []
         header = {}
         header[:title] = title.to_s if title && !title.to_s.strip.empty?
@@ -76,14 +79,18 @@ module Fastlane
           end
         end
 
-        if button_title && button_url
-          widgets << {
-            buttonList: {
-              buttons: [
-                { text: button_title, onClick: { openLink: { url: button_url } } }
-              ]
-            }
-          }
+        button_list = []
+        if buttons && !buttons.empty?
+          buttons.each do |b|
+            next if b[:text].to_s.strip.empty? || b[:url].to_s.strip.empty?
+            button_list << { text: b[:text], onClick: { openLink: { url: b[:url] } } }
+          end
+        elsif button_title && button_url
+          button_list << { text: button_title, onClick: { openLink: { url: button_url } } }
+        end
+
+        unless button_list.empty?
+          widgets << { buttonList: { buttons: button_list } }
         end
 
         card = { sections: [{ widgets: widgets }] }
