@@ -27,15 +27,23 @@ module Fastlane
 
       # Cleans a conventional-changelog markdown changelog for Google Chat:
       # - removes git hash/URL suffixes like "([1d54d0f](/1d54d0f...))"
-      # - converts markdown headers (#, ##, ###, ...) to *bold*
+      # - converts markdown headers (#, ##, ###, ...) to bold
       # - strips surrounding whitespace
-      # Newlines are preserved; use #paragraph (card) or #normalize_newlines
-      # (plain) afterwards depending on the message type.
-      def self.clean_changelog(text)
-        text.to_s
-            .gsub(/\s*\(\[[0-9a-fA-F]{6,}\]\([^)]*\)\)/, "")
-            .gsub(/^[#]{1,6}\s+(.+)$/, "*\\1*")
-            .strip
+      #
+      # format:
+      #   "card"  -> <b>headers</b> + "• " bullets (HTML, rendered by textParagraph)
+      #   "plain" -> *headers* (markdown, rendered by {"text": ...})
+      def self.clean_changelog(text, format: "card")
+        cleaned = text.to_s
+                    .gsub(/\s*\(\[[0-9a-fA-F]{6,}\]\([^)]*\)\)/, "")
+                    .strip
+        if format == "plain"
+          cleaned.gsub(/^[#]{1,6}\s+(.+)$/, "*\\1*")
+        else
+          cleaned
+            .gsub(/^[#]{1,6}\s+(.+)$/, "<b>\\1</b>")
+            .gsub(/^- /, "• ")
+        end
       end
 
       # Builds a plain-text payload ({"text": ...}) that preserves newlines.
@@ -43,52 +51,44 @@ module Fastlane
         { text: normalize_newlines(text) }
       end
 
-      # Builds a cardsV2 payload (Google Chat API v2).
-      # Keeps the original plugin contract: title, description,
-      # section1Title, section1Description, buttonTitle, buttonUrl, imageUrl.
-      # Uses cardsV2 widget types: textParagraph, decoratedText, buttonList.
-      def self.card_payload(title:, description:, image_url: nil, section1_title: nil,
-                            section1_description: nil, button_title: nil, button_url: nil)
+      # Builds a cardsV2 payload (Google Chat API v2) matching Google's
+      # webhook card format: one section with textParagraph + buttonList,
+      # description in the header subtitle, and a simple cardId.
+      def self.card_payload(title:, description:, subtitle: nil, section_title: nil,
+                            section_description: nil, button_title: nil, button_url: nil)
         widgets = []
+        header = {}
+        header[:title] = title.to_s if title && !title.to_s.strip.empty?
 
-        if description && !description.to_s.strip.empty?
-          widgets << { textParagraph: { text: paragraph(description) } }
+        has_section = !section_title.to_s.strip.empty? || !section_description.to_s.strip.empty?
+        if has_section
+          # description goes to the header subtitle (like the working curl)
+          header[:subtitle] = (subtitle || description).to_s
+          text_parts = []
+          text_parts << "<b>#{section_title}:</b>" unless section_title.to_s.strip.empty?
+          text_parts << section_description unless section_description.to_s.strip.empty?
+          widgets << { textParagraph: { text: paragraph(text_parts.join("<br><br>")) } }
+        else
+          header[:subtitle] = subtitle.to_s if subtitle && !subtitle.to_s.strip.empty?
+          if description && !description.to_s.strip.empty?
+            widgets << { textParagraph: { text: paragraph(description) } }
+          end
         end
 
-        if section1_title || section1_description
+        if button_title && button_url
           widgets << {
-            decoratedText: {
-              topLabel: section1_title,
-              text: paragraph(section1_description)
+            buttonList: {
+              buttons: [
+                { text: button_title, onClick: { openLink: { url: button_url } } }
+              ]
             }
           }
         end
 
-        sections = []
-        sections << { widgets: widgets } unless widgets.empty?
+        card = { sections: [{ widgets: widgets }] }
+        card[:header] = header unless header.empty?
 
-        if button_title && button_url
-          sections << {
-            widgets: [
-              {
-                buttonList: {
-                  buttons: [
-                    {
-                      text: button_title,
-                      onClick: { openLink: { url: button_url } }
-                    }
-                  ]
-                }
-              }
-            ]
-          }
-        end
-
-        card = { sections: sections }
-        card[:header] = { title: title.to_s } if title && !title.to_s.strip.empty?
-        card[:header][:imageUrl] = image_url if image_url && !image_url.to_s.strip.empty?
-
-        { cardsV2: [{ cardId: "google_chat_card", card: card }] }
+        { cardsV2: [{ cardId: "build-notification", card: card }] }
       end
 
       # Sends the payload to the webhook. Returns true on success.
