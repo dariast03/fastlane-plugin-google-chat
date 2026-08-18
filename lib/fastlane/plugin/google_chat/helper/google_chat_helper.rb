@@ -42,7 +42,7 @@ module Fastlane
         else
           cleaned
             .gsub(/^[#]{1,6}\s+(.+)$/, "<b>\\1</b>")
-            .gsub(/^- /, "• ")
+            .gsub(/^-\s+/, "• ")   # "• " bullets (handle 1+ spaces after "-")
         end
       end
 

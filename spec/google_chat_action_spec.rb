@@ -34,6 +34,13 @@ describe Fastlane::Helper::GoogleChatHelper do
       expect(out).to include("• add shorebird")
     end
 
+    it 'converts bullet dashes with extra spaces (double-space commit subjects)' do
+      out = Fastlane::Helper::GoogleChatHelper.clean_changelog(
+        "-  add firebase_remote_config and dynamic_app_icon_flutter_plus packages"
+      )
+      expect(out).to eq("• add firebase_remote_config and dynamic_app_icon_flutter_plus packages")
+    end
+
     it 'converts headers to *bold* (plain format)' do
       out = Fastlane::Helper::GoogleChatHelper.clean_changelog(
         "# 2.1.0 (2026-08-18)\n\n### Features\n- add shorebird",
