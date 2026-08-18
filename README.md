@@ -14,25 +14,35 @@ fastlane add_plugin google_chat
 
 ## About google_chat
 
-Send messages to Google Chat
+Send messages to Google Chat. This fork uses the **Google Chat API v2** (`cardsV2`) and adds support for plain-text messages that preserve newlines.
 
-**Note to author:** Add a more detailed description about this plugin here. If your plugin contains multiple actions, make sure to mention them here.
+Key improvements over the original:
+- Uses `cardsV2` (the legacy `cards` field is deprecated).
+- Newlines in `description` / `section1Description` are converted to `<br>` so multi-line changelogs render correctly in cards.
+- New `message_type` option to send a plain text message (`{"text": ...}`) that keeps newlines as-is.
+- Optional parameters (only `webhook` is required).
+- Reports the HTTP error code/body when the webhook call fails.
 
 ## Example
 
-Check out the [example `Fastfile`](fastlane/Fastfile) to see how to use this plugin. Try it by cloning the repo, running `fastlane install_plugins` and `bundle exec fastlane test`.
-
-````ruby 
+````ruby
+# Card message (default) — newlines become <br>
 google_chat(
-      imageUrl: 'URL_OF_ICON',
-      webhook: 'URL_OF_WEBHOOK',
-      title: 'TITLE',
-      description: 'MESSAGE',
-      section1Title: 'TITLE_SESSION',
-      section1Description: 'DESCRIPTION_SESSION',
-      buttonTitle: "BUTTON_TITLE",
-      buttonUrl: "URL_ACTION"
-    )
+  webhook: 'URL_OF_WEBHOOK',
+  title: 'TITLE',
+  description: 'line1\nline2',
+  section1Title: 'TITLE_SECTION',
+  section1Description: 'DESCRIPTION_SECTION',
+  buttonTitle: 'BUTTON_TITLE',
+  buttonUrl: 'URL_ACTION'
+)
+
+# Plain text message — newlines are preserved as-is
+google_chat(
+  webhook: 'URL_OF_WEBHOOK',
+  description: "Feature A\nFix B",
+  message_type: 'plain'
+)
 ````
 
 
