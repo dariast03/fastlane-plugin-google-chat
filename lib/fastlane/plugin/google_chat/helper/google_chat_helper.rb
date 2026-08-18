@@ -25,6 +25,19 @@ module Fastlane
         text.to_s.gsub("\r\n", "\n").gsub('\\n', "\n")
       end
 
+      # Cleans a conventional-changelog markdown changelog for Google Chat:
+      # - removes git hash/URL suffixes like "([1d54d0f](/1d54d0f...))"
+      # - converts markdown headers (#, ##, ###, ...) to *bold*
+      # - strips surrounding whitespace
+      # Newlines are preserved; use #paragraph (card) or #normalize_newlines
+      # (plain) afterwards depending on the message type.
+      def self.clean_changelog(text)
+        text.to_s
+            .gsub(/\s*\(\[[0-9a-fA-F]{6,}\]\([^)]*\)\)/, "")
+            .gsub(/^[#]{1,6}\s+(.+)$/, "*\\1*")
+            .strip
+      end
+
       # Builds a plain-text payload ({"text": ...}) that preserves newlines.
       def self.plain_payload(text)
         { text: normalize_newlines(text) }

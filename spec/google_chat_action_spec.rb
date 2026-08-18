@@ -17,6 +17,24 @@ describe Fastlane::Helper::GoogleChatHelper do
     end
   end
 
+  describe '#clean_changelog' do
+    it 'removes git hash/URL suffixes' do
+      out = Fastlane::Helper::GoogleChatHelper.clean_changelog(
+        "- fix stuff ([4e92c34](/4e92c34fb27d44bc75b088d3ba5bd81f002a1c2c))"
+      )
+      expect(out).to eq("- fix stuff")
+    end
+
+    it 'converts markdown headers to *bold*' do
+      out = Fastlane::Helper::GoogleChatHelper.clean_changelog(
+        "# 2.1.0 (2026-08-18)\n\n### Features\n- add shorebird"
+      )
+      expect(out).to include("*2.1.0 (2026-08-18)*")
+      expect(out).to include("*Features*")
+      expect(out).to include("- add shorebird")
+    end
+  end
+
   describe '#plain_payload' do
     it 'returns a text payload' do
       expect(Fastlane::Helper::GoogleChatHelper.plain_payload("hello\nworld"))
